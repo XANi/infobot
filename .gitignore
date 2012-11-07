@@ -1,0 +1,16 @@
+*~
+.*.sw?
+.sw?
+\#*\#
+DEADJOE
+blib/
+.build/
+_build/
+cover_db/
+inc/
+Build
+Build.bat
+.last_cover_stats
+Makefile
+Makefile.old
+/bot.yaml
