@@ -1,2 +1,22 @@
 * infobot
 lil xmpp bot
+** Installation
+
+INSTALLATION
+
+To install this module, run the following commands:
+
++ perl Makefile.PL
++ make
++ make test
+# not working right yet# + make install
+
+** License
+
+Copyright (C) 2012 XANi
+
+This program is free software; you can redistribute it and/or modify it
+under the terms of either: the GNU General Public License as published
+by the Free Software Foundation; or the Artistic License.
+
+See http://dev.perl.org/licenses/ for more information.
