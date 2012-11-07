@@ -16,7 +16,6 @@ if ( ! -e $config_file) {
 my $tmp = read_file($config_file) or croak("Can't load config: $!");
 my $cfg = Load($tmp) or croak("Can't parse config: $!");
 
-
 binmode STDOUT, ":utf8";
 
 if (!defined($cfg->{'xmpp_user'}) || !defined($cfg->{'xmpp_pass'}) ) {
@@ -35,6 +34,31 @@ $cl->set_presence (undef, 'I\'m a talking bot.', 1);
 
 $cl->add_account ($cfg->{'xmpp_user'}, $cfg->{'xmpp_pass'});
 warn "connecting to $cfg->{xmpp_user}...\n";
+my $module = {};
+$module->{'help'} = sub {
+    my ($cl, $acc, $msg) = @_;
+    my $repl = $msg->make_reply;
+    $repl->add_body (
+        "\nSupported commands:\n"
+            . join("\n", keys(%$module))
+    );
+    warn "Got message: '".$msg->any_body."' from ".$msg->from."\n";
+    $repl->send;
+};
+$module->{'echo'} = sub {
+    my ($cl, $acc, $msg) = @_;
+    my $repl = $msg->make_reply;
+    my (undef, $reply) = split(/\s/,$msg->any_body);
+    $repl->add_body ( "Echo: " . $reply);
+    $repl->send;
+};
+
+$module->{'time'} = sub {
+    my ($cl, $acc, $msg) = @_;
+    my $repl = $msg->make_reply;
+    $repl->add_body (scalar localtime(time));
+    $repl->send;
+};
 
 $cl->reg_cb (
    session_ready => sub {
@@ -43,10 +67,11 @@ $cl->reg_cb (
    },
    message => sub {
       my ($cl, $acc, $msg) = @_;
-      my $repl = $msg->make_reply;
-      $repl->add_body ("You said '".$msg->any_body."'");
-      warn "Got message: '".$msg->any_body."' from ".$msg->from."\n";
-      $repl->send;
+      my ($target_module, undef) = split(/\s+/,$msg->any_body);
+      if ( ! defined( $module->{$target_module} ) ) {
+          $target_module = 'help'; #show help if nonexisting module is called
+      }
+      &{$module->{$target_module}}($cl, $acc, $msg);
    },
    contact_request_subscribe => sub {
       my ($cl, $acc, $roster, $contact) = @_;
