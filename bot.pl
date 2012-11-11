@@ -16,7 +16,6 @@ if ( ! -e $config_file) {
 my $tmp = read_file($config_file) or croak("Can't load config: $!");
 my $cfg = Load($tmp) or croak("Can't parse config: $!");
 
-
 binmode STDOUT, ":utf8";
 
 if (!defined($cfg->{'xmpp_user'}) || !defined($cfg->{'xmpp_pass'}) ) {
