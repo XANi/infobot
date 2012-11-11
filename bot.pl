@@ -47,10 +47,9 @@ $module->{'help'} = sub {
 };
 $module->{'echo'} = sub {
     my ($cl, $acc, $msg) = @_;
-    my $repl = $msg->make_reply;
-    my (undef, $reply) = split(/\s/,$msg->any_body);
-    $repl->add_body ( "Echo: " . $reply);
-    $repl->send;
+    use XANi::Infobot::Agent::Echo;
+    my $b = XANi::Infobot::Agent::Echo->new;
+    $b->msg_handler($cl, $acc, $msg);
 };
 
 $module->{'time'} = sub {

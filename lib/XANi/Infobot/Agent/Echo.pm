@@ -1,6 +1,4 @@
-package XANi::Infobot;
-
-package DPP::VCS::Git;
+package XANi::Infobot::Agent::Echo;
 
 use 5.010000;
 use strict;
@@ -31,8 +29,23 @@ sub new {
     bless($self, $class);
     my %cfg = @_;
     $self->{'cfg'} = \%cfg;
+
     return $self;
-}
+};
+
+sub info {
+    my $s = shift;
+    return "Just echo plugin";
+};
+
+sub msg_handler {
+    my $s = shift;
+    my ($cl, $acc, $msg) = @_;
+    my $repl = $msg->make_reply;
+    my (undef, $reply) = split(/\s/,$msg->any_body);
+    $repl->add_body ( "Echo: " . $reply);
+    $repl->send;
+};
 
 
 1;
@@ -41,12 +54,12 @@ __END__
 
 =head1 NAME
 
-XANi::Infobot;
+XANi::Infobot::Agent::Echo;
 
 =head1 SYNOPSIS
 
-  use XANi::Infobot;
-  blah blah blah
+  use XANi::Infobot::Agent::Echo;
+
 
 =head1 DESCRIPTION
 
