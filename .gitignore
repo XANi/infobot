@@ -20,5 +20,6 @@ Makefile
 Makefile.old
 pod2htm*.tmp
 
-# config
+#config
 /bot.yaml
+

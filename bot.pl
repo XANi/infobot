@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+use lib './lib';
 use common::sense;
 use AnyEvent;
 use AnyEvent::XMPP::Client;
@@ -8,6 +9,7 @@ use AnyEvent::XMPP::Namespaces qw(xmpp_ns);
 use YAML;
 use File::Slurp;
 use Carp; qw( carp croak );
+use Module::Load;
 
 my $config_file = 'bot.yaml';
 if ( ! -e $config_file) {
@@ -35,29 +37,14 @@ $cl->set_presence (undef, 'I\'m a talking bot.', 1);
 $cl->add_account ($cfg->{'xmpp_user'}, $cfg->{'xmpp_pass'});
 warn "connecting to $cfg->{xmpp_user}...\n";
 my $module = {};
-$module->{'help'} = sub {
-    my ($cl, $acc, $msg) = @_;
-    my $repl = $msg->make_reply;
-    $repl->add_body (
-        "\nSupported commands:\n"
-            . join("\n", keys(%$module))
-    );
-    warn "Got message: '".$msg->any_body."' from ".$msg->from."\n";
-    $repl->send;
-};
-$module->{'echo'} = sub {
-    my ($cl, $acc, $msg) = @_;
-    use XANi::Infobot::Agent::Echo;
-    my $b = XANi::Infobot::Agent::Echo->new;
-    $b->msg_handler($cl, $acc, $msg);
-};
+while (my ($name, $module_config) = each %{ $cfg->{'modules'} } ) {
+    my $modulename = 'XANi::Infobot::Agent::' . ucfirst($name);
+    load $modulename;
+    my $m = $modulename->new($module_config);
+    $module->{$name}{'info'} = $m->info();
+    $module->{$name}{'handler'} = $m;
+}
 
-$module->{'time'} = sub {
-    my ($cl, $acc, $msg) = @_;
-    my $repl = $msg->make_reply;
-    $repl->add_body (scalar localtime(time));
-    $repl->send;
-};
 
 $cl->reg_cb (
    session_ready => sub {
@@ -68,9 +55,11 @@ $cl->reg_cb (
       my ($cl, $acc, $msg) = @_;
       my ($target_module, undef) = split(/\s+/,$msg->any_body);
       if ( ! defined( $module->{$target_module} ) ) {
-          $target_module = 'help'; #show help if nonexisting module is called
+          &help($cl, $acc, $msg);
       }
-      &{$module->{$target_module}}($cl, $acc, $msg);
+      else {
+          $module->{$target_module}{'handler'}->msg_handler($cl, $acc, $msg);
+      }
    },
    contact_request_subscribe => sub {
       my ($cl, $acc, $roster, $contact) = @_;
@@ -91,3 +80,16 @@ $cl->reg_cb (
 $cl->start;
 
 $j->wait;
+
+sub help {
+    my ($cl, $acc, $msg) = @_;
+    my $repl = $msg->make_reply;
+    my $body = "Supported commands:\n";
+    while(my ($name, $config) = each (%$module) ) {
+        print Dumper $config;
+        $body .= "    $name - " . $config->{'info'} . "\n";
+    }
+    $repl->add_body ($body);
+    warn $msg->from . 'asked for help';
+    $repl->send;
+}
