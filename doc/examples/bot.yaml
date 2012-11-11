@@ -1,3 +1,6 @@
 ---
 xmpp_user: bot@server.net
 xmpp_pass: pass_word
+modules:
+  echo: ~
+

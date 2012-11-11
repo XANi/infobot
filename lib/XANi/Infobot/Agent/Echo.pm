@@ -27,15 +27,12 @@ sub new {
     my $class = ref($proto) || $proto;
     my $self = {};
     bless($self, $class);
-    my %cfg = @_;
-    $self->{'cfg'} = \%cfg;
-
     return $self;
 };
 
 sub info {
     my $s = shift;
-    return "Just echo plugin";
+    return "Simple echo plugin";
 };
 
 sub msg_handler {
@@ -58,21 +55,12 @@ XANi::Infobot::Agent::Echo;
 
 =head1 SYNOPSIS
 
-  use XANi::Infobot::Agent::Echo;
+Just add it to modules in config
 
 
 =head1 DESCRIPTION
 
-Blah blah blah.
-
-=head2 EXPORT
-
-None by default.
-
-
-
-=head1 SEE ALSO
-
+This module just eches whatever is sent to it
 
 
 =head1 AUTHOR
