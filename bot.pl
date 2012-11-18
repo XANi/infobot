@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+use lib './lib';
 use common::sense;
 use AnyEvent;
 use AnyEvent::XMPP::Client;
@@ -9,6 +10,8 @@ use YAML;
 use File::Slurp;
 use Carp; qw( carp croak );
 use Module::Load;
+use Data::Dumper;
+use Digest::SHA qw(sha1_hex);
 
 my $config_file = 'bot.yaml';
 if ( ! -e $config_file) {
@@ -43,6 +46,20 @@ while (my ($name, $module_config) = each %{ $cfg->{'modules'} } ) {
     $module->{$name}{'info'} = $m->info();
     $module->{$name}{'handler'} = $m;
 }
+my $events = {}; # state table for active events;
+
+
+# my $ev_cleanup = AnyEvent->timer(
+#     after => 60,
+#     interval => 1,
+#     cb => sub {
+#         while ( my($k, $ev) = each(%$events) ) {
+#             if ( $ev->{'time'} + 60 < time()) { # do not allow any event stay for more than 60s
+#                 delete $events->{$k};
+#             }
+#         }
+#     }
+# );
 
 
 $cl->reg_cb (
@@ -53,13 +70,30 @@ $cl->reg_cb (
    message => sub {
       my ($cl, $acc, $msg) = @_;
       my ($target_module, undef) = split(/\s+/,$msg->any_body);
+      if ($target_module eq 'dump') {
+          my $repl = $msg->make_reply;
+          while ( my ($k, $v) = each (%$events) ) {
+              $repl->add_body(Dumper(%{{$v}}));
+          }
+          $repl->send;
+          return;
+       }
       if ( ! defined( $module->{$target_module} ) ) {
           &help($cl, $acc, $msg);
       }
       else {
-          $module->{$target_module}{'handler'}->msg_handler($cl, $acc, $msg);
+          my $k = sha1sum($msg . scalar time);
+          if ( defined( $events->{$k} )) {
+              my $repl = $msg->make_reply;
+              $repl->add_body("Stop spamming same command! I'm working as fast as I can");
+              $repl->send;
+          }
+          else {
+              $events->{$k}{'time'} = scalar time;
+              $events->{$k}{'obj'} = {$module->{$target_module}{'handler'}->msg_handler($cl, $acc, $msg)};
+          }
       }
-   },
+  },
    contact_request_subscribe => sub {
       my ($cl, $acc, $roster, $contact) = @_;
       $contact->send_subscribed;
