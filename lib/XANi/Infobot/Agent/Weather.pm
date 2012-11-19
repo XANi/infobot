@@ -41,28 +41,26 @@ sub msg_handler {
     my $s = shift;
     my ($cl, $acc, $msg) = @_;
     my(undef, $woeid) = split (/\s+/,$msg);
+    my $repl = $msg->make_reply;
     if ($woeid < 1) {
-        my $repl = $msg->make_reply;
-        $repl->add_body("Please specify WOEID for your location,  you can look it up at http://woeid.rosselliot.co.nz/");
+        $repl->add_body ("Please specify WOEID for your location,  you can look it up at http://woeid.rosselliot.co.nz/");
         $repl->send;
         return;
     }
     else {
-        my $req = http_request(
-            #GET => 'http://weather.yahooapis.com/forecastrss?w=' . int($woeid) . '&u=c',
-            GET => 'http://127.0.0.1',
-            timeout => 10,
+       my $req;
+       $req = http_request(
+            GET => 'http://weather.yahooapis.com/forecastrss?w=' . int($woeid) . '&u=c',
             sub {
-                my ($body, $hdr) = @_;
-                print "IN CALLBACK\n";
-
-                my $repl = $msg->make_reply;
-                $repl->add_body('asasas');
+                 my ($body, $hdr) = @_;
+                 $req = 'dupa';
+                 $repl->add_body($body);
                 $repl->send;
-#                return;
+                                return "FINISHED";
+
             }
-        );
-        return $req;
+      );
+       return $req;
    }
 };
 

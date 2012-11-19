@@ -49,20 +49,18 @@ while (my ($name, $module_config) = each %{ $cfg->{'modules'} } ) {
 my $events = {}; # state table for active events;
 
 
-# my $ev_cleanup = AnyEvent->timer(
-#     after => 20,
-#     interval => 5,
-#     cb => sub {
-#         print "Cleaning up new events\n";
-#         while ( my($k, $ev) = each(%$events) ) {
-#             if ( $ev->{'time'} + 60 < time()) { # do not allow any event stay for more than 60s
-#                 delete $events->{$k};
-#             }
-#         }
-#         print "Clean finished\n";
-#     }
-# );
-my $a;
+ my $ev_cleanup = AnyEvent->timer(
+     after => 60,
+     interval => 1,
+     cb => sub {
+         while ( my($k, $ev) = each(%$events) ) {
+             if ( $ev->{'time'} + 60 < time()) { # do not allow any event stay for more than 60s
+                 delete $events->{$k};
+             }
+         }
+     }
+ );
+
 
 $cl->reg_cb (
    session_ready => sub {
@@ -89,9 +87,8 @@ $cl->reg_cb (
               $repl->send;
           }
           else {
-        #      $events->{$k}{'time'} = scalar time;
-              #$events->{$k}{'obj'} = {$module->{$target_module}{'handler'}->msg_handler($cl, $acc, $msg)};
-              $a = {$module->{$target_module}{'handler'}->msg_handler($cl, $acc, $msg)};
+              $events->{$k}{'time'} = scalar time;
+              $events->{$k}{'obj'} = {$module->{$target_module}{'handler'}->msg_handler($cl, $acc, $msg)};
           }
       }
   },
