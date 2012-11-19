@@ -41,35 +41,28 @@ sub msg_handler {
     my $s = shift;
     my ($cl, $acc, $msg) = @_;
     my(undef, $woeid) = split (/\s+/,$msg);
-    my $repl = $msg->make_reply;
     if ($woeid < 1) {
-        $repl->add_body ("Please specify WOEID for your location,  you can look it up at http://woeid.rosselliot.co.nz/");
+        my $repl = $msg->make_reply;
+        $repl->add_body("Please specify WOEID for your location,  you can look it up at http://woeid.rosselliot.co.nz/");
         $repl->send;
         return;
     }
     else {
-       my $req;
-#       $req = http_request(
-#            GET => 'http://weather.yahooapis.com/forecastrss?w=' . int($woeid) . '&u=c',
-#            sub {
-#                 my ($body, $hdr) = @_;
-#                 $req = 'dupa';
+        my $req = http_request(
+            #GET => 'http://weather.yahooapis.com/forecastrss?w=' . int($woeid) . '&u=c',
+            GET => 'http://127.0.0.1',
+            timeout => 10,
+            sub {
+                my ($body, $hdr) = @_;
+                print "IN CALLBACK\n";
 
-#                 $repl->add_body($body);
- #                $repl->send;
-  #                                return "FINISHED";
-#
- #            }
-  #      );
-  $req = AnyEvent->timer(
-            after => 5,
-            cb => sub {
-                print "--- --- \n";
-                $repl->add_body('ping');
+                my $repl = $msg->make_reply;
+                $repl->add_body('asasas');
                 $repl->send;
+#                return;
             }
         );
-       return $req;
+        return $req;
    }
 };
 

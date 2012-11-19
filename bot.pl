@@ -27,7 +27,7 @@ if (!defined($cfg->{'xmpp_user'}) || !defined($cfg->{'xmpp_pass'}) ) {
 }
 
 my $j       = AnyEvent->condvar;
-my $cl      = AnyEvent::XMPP::Client->new (debug => 1);
+my $cl      = AnyEvent::XMPP::Client->new (debug => 0);
 my $disco   = AnyEvent::XMPP::Ext::Disco->new;
 my $version = AnyEvent::XMPP::Ext::Version->new;
 
@@ -50,17 +50,19 @@ my $events = {}; # state table for active events;
 
 
 # my $ev_cleanup = AnyEvent->timer(
-#     after => 60,
-#     interval => 1,
+#     after => 20,
+#     interval => 5,
 #     cb => sub {
+#         print "Cleaning up new events\n";
 #         while ( my($k, $ev) = each(%$events) ) {
 #             if ( $ev->{'time'} + 60 < time()) { # do not allow any event stay for more than 60s
 #                 delete $events->{$k};
 #             }
 #         }
+#         print "Clean finished\n";
 #     }
 # );
-
+my $a;
 
 $cl->reg_cb (
    session_ready => sub {
@@ -72,9 +74,7 @@ $cl->reg_cb (
       my ($target_module, undef) = split(/\s+/,$msg->any_body);
       if ($target_module eq 'dump') {
           my $repl = $msg->make_reply;
-          while ( my ($k, $v) = each (%$events) ) {
-              $repl->add_body(Dumper(%{{$v}}));
-          }
+          $repl->add_body(Dumper($events));
           $repl->send;
           return;
        }
@@ -82,15 +82,16 @@ $cl->reg_cb (
           &help($cl, $acc, $msg);
       }
       else {
-          my $k = sha1sum($msg . scalar time);
+          my $k = sha1_hex($msg . scalar time);
           if ( defined( $events->{$k} )) {
               my $repl = $msg->make_reply;
               $repl->add_body("Stop spamming same command! I'm working as fast as I can");
               $repl->send;
           }
           else {
-              $events->{$k}{'time'} = scalar time;
-              $events->{$k}{'obj'} = {$module->{$target_module}{'handler'}->msg_handler($cl, $acc, $msg)};
+        #      $events->{$k}{'time'} = scalar time;
+              #$events->{$k}{'obj'} = {$module->{$target_module}{'handler'}->msg_handler($cl, $acc, $msg)};
+              $a = {$module->{$target_module}{'handler'}->msg_handler($cl, $acc, $msg)};
           }
       }
   },
