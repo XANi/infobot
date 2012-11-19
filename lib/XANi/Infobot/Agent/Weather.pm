@@ -49,26 +49,17 @@ sub msg_handler {
     }
     else {
        my $req;
-#       $req = http_request(
-#            GET => 'http://weather.yahooapis.com/forecastrss?w=' . int($woeid) . '&u=c',
-#            sub {
-#                 my ($body, $hdr) = @_;
-#                 $req = 'dupa';
-
-#                 $repl->add_body($body);
- #                $repl->send;
-  #                                return "FINISHED";
-#
- #            }
-  #      );
-  $req = AnyEvent->timer(
-            after => 5,
-            cb => sub {
-                print "--- --- \n";
-                $repl->add_body('ping');
+       $req = http_request(
+            GET => 'http://weather.yahooapis.com/forecastrss?w=' . int($woeid) . '&u=c',
+            sub {
+                 my ($body, $hdr) = @_;
+                 $req = 'dupa';
+                 $repl->add_body($body);
                 $repl->send;
+                                return "FINISHED";
+
             }
-        );
+      );
        return $req;
    }
 };

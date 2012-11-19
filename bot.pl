@@ -82,7 +82,7 @@ $cl->reg_cb (
           &help($cl, $acc, $msg);
       }
       else {
-          my $k = sha1sum($msg . scalar time);
+          my $k = sha1_hex($msg . scalar time);
           if ( defined( $events->{$k} )) {
               my $repl = $msg->make_reply;
               $repl->add_body("Stop spamming same command! I'm working as fast as I can");
