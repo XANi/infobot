@@ -49,17 +49,17 @@ while (my ($name, $module_config) = each %{ $cfg->{'modules'} } ) {
 my $events = {}; # state table for active events;
 
 
-# my $ev_cleanup = AnyEvent->timer(
-#     after => 60,
-#     interval => 1,
-#     cb => sub {
-#         while ( my($k, $ev) = each(%$events) ) {
-#             if ( $ev->{'time'} + 60 < time()) { # do not allow any event stay for more than 60s
-#                 delete $events->{$k};
-#             }
-#         }
-#     }
-# );
+ my $ev_cleanup = AnyEvent->timer(
+     after => 60,
+     interval => 1,
+     cb => sub {
+         while ( my($k, $ev) = each(%$events) ) {
+             if ( $ev->{'time'} + 60 < time()) { # do not allow any event stay for more than 60s
+                 delete $events->{$k};
+             }
+         }
+     }
+ );
 
 
 $cl->reg_cb (
@@ -72,9 +72,7 @@ $cl->reg_cb (
       my ($target_module, undef) = split(/\s+/,$msg->any_body);
       if ($target_module eq 'dump') {
           my $repl = $msg->make_reply;
-          while ( my ($k, $v) = each (%$events) ) {
-              $repl->add_body(Dumper(%{{$v}}));
-          }
+          $repl->add_body(Dumper($events));
           $repl->send;
           return;
        }
