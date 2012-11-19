@@ -71,8 +71,9 @@ $cl->reg_cb (
       my ($cl, $acc, $msg) = @_;
       my ($target_module, undef) = split(/\s+/,$msg->any_body);
       if ($target_module eq 'dump') {
+          my (undef, $tmp) = split(/\s+/,$msg->any_body);
           my $repl = $msg->make_reply;
-          $repl->add_body(Dumper($events));
+          $repl->add_body( $module->{$tmp}{'handler'}->dump() );
           $repl->send;
           return;
        }
@@ -87,8 +88,7 @@ $cl->reg_cb (
               $repl->send;
           }
           else {
-              $events->{$k}{'time'} = scalar time;
-              $events->{$k}{'obj'} = {$module->{$target_module}{'handler'}->msg_handler($cl, $acc, $msg)};
+              $module->{$target_module}{'handler'}->msg_handler($cl, $acc, $msg);
           }
       }
   },

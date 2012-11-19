@@ -6,7 +6,8 @@ use warnings;
 use Carp qw(cluck croak carp);
 use Data::Dumper;
 use AnyEvent::HTTP;
-use XML::Simple
+use XML::Simple;
+use Digest::SHA qw(sha1_hex);
 
 require Exporter;
 
@@ -30,6 +31,7 @@ sub new {
     my $class = ref($proto) || $proto;
     my $self = {};
     bless($self, $class);
+    $self->{'events'} = {};
     return $self;
 };
 
@@ -39,7 +41,7 @@ sub info {
 };
 
 sub msg_handler {
-    my $s = shift;
+    my $self = shift;
     my ($cl, $acc, $msg) = @_;
     my(undef, $woeid) = split (/\s+/,$msg);
     my $repl = $msg->make_reply;
@@ -49,8 +51,14 @@ sub msg_handler {
         return;
     }
     else {
-       my $req;
-       $req = http_request(
+       my $reqid = sha1_hex(time . $msg);
+       if ( defined( $self->{'events'}{$reqid} ) ) {
+           my $repl = $msg->make_reply;
+           $repl->add_body("Stop spamming same command! I'm working as fast as I can");
+           $repl->send;
+           return;
+       }
+       $self->{'events'}{$reqid} = http_request(
             GET => 'http://weather.yahooapis.com/forecastrss?w=' . int($woeid) . '&u=c',
             sub {
                 my ($body, $hdr) = @_;
@@ -70,13 +78,16 @@ sub msg_handler {
                 }
                 $repl->add_body($forecast);
                 $repl->send;
-                undef $req;
-
+                delete $self->{'events'}{$reqid};
             }
-      );
-       return $req;
+        );
    }
 };
+sub dump {
+    use Data::Dumper;
+    my $self = shift;
+    return Dumper $self->{'events'};
+}
 
 
 
