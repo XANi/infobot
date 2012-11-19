@@ -1,5 +1,7 @@
 * infobot
 lil xmpp bot
+** Configuration
+   copy example config from doc/examples/bot.yaml to main dir, then set it up to some jabber account
 ** Installation
 
 INSTALLATION
