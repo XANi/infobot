@@ -83,13 +83,6 @@ sub msg_handler {
         );
    }
 };
-sub dump {
-    use Data::Dumper;
-    my $self = shift;
-    return Dumper $self->{'events'};
-}
-
-
 
 1;
 __END__

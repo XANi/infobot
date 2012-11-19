@@ -70,26 +70,12 @@ $cl->reg_cb (
    message => sub {
       my ($cl, $acc, $msg) = @_;
       my ($target_module, undef) = split(/\s+/,$msg->any_body);
-      if ($target_module eq 'dump') {
-          my (undef, $tmp) = split(/\s+/,$msg->any_body);
-          my $repl = $msg->make_reply;
-          $repl->add_body( $module->{$tmp}{'handler'}->dump() );
-          $repl->send;
-          return;
-       }
       if ( ! defined( $module->{$target_module} ) ) {
           &help($cl, $acc, $msg);
       }
       else {
           my $k = sha1_hex($msg . scalar time);
-          if ( defined( $events->{$k} )) {
-              my $repl = $msg->make_reply;
-              $repl->add_body("Stop spamming same command! I'm working as fast as I can");
-              $repl->send;
-          }
-          else {
-              $module->{$target_module}{'handler'}->msg_handler($cl, $acc, $msg);
-          }
+          $module->{$target_module}{'handler'}->msg_handler($cl, $acc, $msg);
       }
   },
    contact_request_subscribe => sub {
