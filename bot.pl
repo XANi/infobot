@@ -10,6 +10,7 @@ use YAML;
 use File::Slurp;
 use Carp; qw( carp croak );
 use Module::Load;
+binmode STDOUT, ":utf8";
 
 my $config_file = 'bot.yaml';
 if ( ! -e $config_file) {
@@ -18,11 +19,10 @@ if ( ! -e $config_file) {
 my $tmp = read_file($config_file) or croak("Can't load config: $!");
 my $cfg = Load($tmp) or croak("Can't parse config: $!");
 
-binmode STDOUT, ":utf8";
-
 if (!defined($cfg->{'xmpp_user'}) || !defined($cfg->{'xmpp_pass'}) ) {
     croak("Need xmmp_user and xmpp_pass in config!");
 }
+
 
 my $j       = AnyEvent->condvar;
 my $cl      = AnyEvent::XMPP::Client->new (debug => 1);
