@@ -1,27 +1,11 @@
-package XANi::Infobot;
-
-package DPP::VCS::Git;
+package Infobot;
 
 use 5.010000;
 use strict;
 use warnings;
 use Carp qw(cluck croak carp);
 use Data::Dumper;
-require Exporter;
-
-our @ISA = qw(Exporter);
-
-
-our %EXPORT_TAGS = ( 'all' => [ qw(
-
-                                 ) ] );
-
-our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
-
-our @EXPORT = qw(
-
-               );
-
+use Infobot::Config;
 our $VERSION = '0.01';
 
 sub new {
@@ -30,7 +14,10 @@ sub new {
     my $self = {};
     bless($self, $class);
     my %cfg = @_;
-    $self->{'cfg'} = \%cfg;
+    my $config = Infobot::Config->new();
+    $self->{'cfg'} = $config->get();
+    # container for event pointers
+    $self->{'ev'} = {};
     return $self;
 }
 
@@ -41,11 +28,11 @@ __END__
 
 =head1 NAME
 
-XANi::Infobot;
+Infobot;
 
 =head1 SYNOPSIS
 
-  use XANi::Infobot;
+  use Infobot;
   blah blah blah
 
 =head1 DESCRIPTION

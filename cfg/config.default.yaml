@@ -1,0 +1,6 @@
+---
+xmpp:
+    account: testbot@domain.com
+    pass: account_pass
+
+

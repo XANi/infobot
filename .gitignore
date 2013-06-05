@@ -3,6 +3,7 @@
 .*.sw?
 .sw?
 \#*\#
+.\#*
 DEADJOE
 # Various temp and build files
 
@@ -21,5 +22,5 @@ Makefile.old
 pod2htm*.tmp
 
 #config
-/bot.yaml
+cfg/
 
