@@ -20,6 +20,11 @@ Makefile
 Makefile.old
 pod2htm*.tmp
 
+# carton stuff
+local/*
+*/local
+cpanfile.snapshot
+*/cpanfile.snapshot
+
 #config
 /bot.yaml
-

@@ -1,0 +1,10 @@
+requires 'common::sense';
+requires 'AnyEvent';
+requires 'AnyEvent::XMPP::Client';
+requires 'AnyEvent::XMPP::Ext::Disco';
+requires 'AnyEvent::XMPP::Ext::Version';
+requires 'AnyEvent::XMPP::Namespaces';
+requires 'YAML';
+requires 'File::Slurp';
+requires 'Carp';
+requires 'Module::Load'
